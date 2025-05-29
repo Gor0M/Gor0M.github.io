@@ -1,12 +1,3 @@
-<?php
-$conexion = new mysqli("localhost", "root", "", "Comercializadora");
-
-if ($conexion->connect_error) {
-    die("Conexión fallida: " . $conexion->connect_error);
-}
-
-$resultado = $conexion->query("SELECT * FROM productos");
-?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -51,33 +42,60 @@ navegador fin
     <!-- 
 contenido inicio
  -->
-    <div>
-        <div class="card">
-            <div class="card-body text-center">
-                <h1>Productos</h1>
+    <div class="container text-center">
+        <h1>CONTACTO</h1>
+    </div>
+    <div class="container text-center">
+        <div class="card mb-3" style="max-width: 540px;">
+            <div class="row g-0">
+                <div class="col-md-3">
+                    <img src="img/llamar.png" class="img-fluid rounded-start" alt="...">
+                </div>
+                <div class="col-md-9">
+                    <div class="card-body">
+                        <h5 class="card-title">Telefono</h5>
+                        <p class="card-text">481 110 5603</p>
+                    </div>
+                </div>
             </div>
         </div>
-        <table class="table">
-            <thead class="table-primary">
-                <tr>
-                    <th scope="col">ID</th>
-                    <th scope="col">Nombre</th>
-                    <th scope="col">Descripción</th>
-                    <th scope="col">Cantidad Disponible</th>
-                </tr>
-                        <?php while ($row = $resultado->fetch_assoc()) { ?>
-            </thead>
-            <tbody>
-                 <tr>
-                <td><?= $row['id'] ?></td>
-                <td><?= htmlspecialchars($row['nombre']) ?></td>
-                <td><?= nl2br(htmlspecialchars($row['descripcion'])) ?></td>
-                <td><?= $row['cant_disponible'] ?></td>
-            </tr>
-        <?php } ?>
-            </tbody>
-        </table>
-    </table>
+        <div class="card mb-3" style="max-width: 540px;">
+            <div class="row g-0">
+                <div class="col-md-3">
+                    <img src="img/expediente.png" class="img-fluid rounded-start" alt="...">
+                </div>
+                <div class="col-md-9">
+                    <div class="card-body">
+                        <h5 class="card-title">Información</h5>
+                        <p class="card-text">Nombre de la comercializadora: Rogui logistic y comercializadora
+                            Correo: Roguilogistic_comercializadora@hotmail.com</p>
+                    
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card mb-3" style="max-width: 540px;">
+            <div class="row g-0">
+                <div class="col-md-3">
+                    <img src="img/ubicacion.png" class="img-fluid rounded-start" alt="...">
+                </div>
+                <div class="col-md-9">
+                    <div class="card-body">
+                        <h5 class="card-title">Dirección</h5>
+                        <p class="card-text">San Luis Potosi, Mexico</p>
+                    
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="mb-3">
+            <label for="exampleFormControlInput1" class="form-label">Correo</label>
+            <input type="email" class="form-control" id="exampleFormControlInput1" placeholder="name@example.com">
+        </div>
+        <div class="mb-3">
+            <label for="exampleFormControlTextarea1" class="form-label">Mensaje</label>
+            <textarea class="form-control" id="exampleFormControlTextarea1" rows="3"></textarea>
+        </div>
     </div>
     <!-- 
 contenido fin
@@ -130,4 +148,5 @@ footer fin
  -->
     <link rel="stylesheet" href="js/bootstrap.min.js">
 </body>
+
 </html>

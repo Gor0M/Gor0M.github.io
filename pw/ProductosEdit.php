@@ -1,141 +1,169 @@
+<?php
+$conexion = new mysqli("localhost", "root", "", "Comercializadora");
+
+if ($conexion->connect_error) {
+    die("Conexión fallida: " . $conexion->connect_error);
+}
+
+$id = $nombre = $descripcion = $cant = "";
+$modo_edicion = false;
+
+// 🗑️ Si se solicitó eliminar
+if (isset($_GET['eliminar'])) {
+    $idEliminar = intval($_GET['eliminar']);
+    $conexion->query("DELETE FROM productos WHERE id = $idEliminar");
+    header("Location: ProductosEdit.php"); // Redirigir para evitar reenvío
+    exit();
+}
+
+// Si se solicitó editar (cargar datos al formulario)
+if (isset($_GET['editar'])) {
+    $idEditar = intval($_GET['editar']);
+    $res = $conexion->query("SELECT * FROM productos WHERE id = $idEditar");
+    if ($res && $fila = $res->fetch_assoc()) {
+        $id = $fila['id'];
+        $nombre = $fila['nombre'];
+        $descripcion = $fila['descripcion'];
+        $cant = $fila['cant_disponible'];
+        $modo_edicion = true;
+    }
+}
+
+// Guardar (nuevo o editado)
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $id = intval($_POST['id']);
+    $nombre = $conexion->real_escape_string($_POST['nombre']);
+    $descripcion = $conexion->real_escape_string($_POST['descripcion']);
+    $cant = intval($_POST['cant_disponible']);
+
+    if (isset($_POST['guardar'])) {
+        // Insertar o actualizar
+        $sql = "INSERT INTO productos (id, nombre, descripcion, cant_disponible)
+                VALUES ($id, '$nombre', '$descripcion', $cant)
+                ON DUPLICATE KEY UPDATE
+                    nombre = VALUES(nombre),
+                    descripcion = VALUES(descripcion),
+                    cant_disponible = VALUES(cant_disponible)";
+
+        if (!$conexion->query($sql)) {
+            echo "Error al guardar: " . $conexion->error;
+        }
+    }
+
+    header("Location: ProductosEdit.php");
+    exit();
+}
+
+$resultado = $conexion->query("SELECT * FROM productos");
+?>
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="css/bootstrap.min.css">
-    <title>Comercializadora</title>
+    <title>Gestión de Productos</title>
+    <style>
+        body {
+            font-family: Arial;
+        }
+
+        form,
+        table {
+            width: 80%;
+            margin: auto;
+            margin-top: 20px;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+
+        input[type=text],
+        input[type=number],
+        textarea {
+            width: 100%;
+            padding: 5px;
+            margin-top: 5px;
+        }
+
+        table {
+            border-collapse: collapse;
+            margin-top: 40px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #eee;
+        }
+
+        .btn-editar {
+            background-color: #4CAF50;
+            color: white;
+            padding: 5px 10px;
+        }
+
+        .btn-eliminar {
+            background-color: #f44336;
+            color: white;
+            padding: 5px 10px;
+        }
+    </style>
 </head>
 
 <body>
-    <!-- 
-navegador inicio
- -->
-    <nav class="navbar navbar-expand-lg bg-body-tertiary">
-        <div class="container-fluid bg-primary">
-            <a class="navbar-brand" href="#"><img src="img/CRG.jpeg" alt="Comercializadora" width="50" height="50"
-                    class="d-inline-block align-text-top"></a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTogglerDemo02"
-                aria-controls="navbarTogglerDemo02" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarTogglerDemo02">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
-                        <a class="nav-link active text-warning" aria-current="page" href="index.html">Inicio</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active text-warning" aria-current="page" href="Productos.php">Productos</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active text-warning" aria-current="page" href="#">Marcas</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active text-warning" aria-current="page" href="#">Contactanos</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-    <!-- 
-navegador fin
- -->
-    <!-- 
-contenido inicio
- -->
-    <div>
-        <div class="card">
-            <div class="card-body text-center">
-                <h1>Productos</h1>
-            </div>
-        </div>
 
-<a class="btn btn-primary" href="#" role="button">Editar info</a>
-        <table class="table">
-            <thead class="table-primary">
-                <tr>
-                    <th scope="col">ID</th>
-                    <th scope="col">imagen</th>
-                    <th scope="col">Nombre</th>
-                    <th scope="col">Descripcion</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <th scope="row">1</th>
-                    <td>Mark</td>
-                    <td>Otto</td>
-                    <td>@mdo</td>
-                </tr>
-                <tr>
-                    <th scope="row">2</th>
-                    <td>Jacob</td>
-                    <td>Thornton</td>
-                    <td>@fat</td>
-                </tr>
-                <tr>
-                    <th scope="row">3</th>
-                    <td colspan="2">Larry the Bird</td>
-                    <td>@twitter</td>
-                </tr>
-                <tr>
-                    <th scope="row">3</th>
-                    <td colspan="2">Larry the Bird</td>
-                    <td>@twitter</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-    <!-- 
-contenido fin
- -->
-    <!-- 
-footer inicio
- -->
-    <div class="container">
-        <footer class="py-5">
-            <div class="row">
-                <div class="col-6 col-md-2 mb-3">
-                    <h5>Redes sociales</h5>
-                    <ul class="nav flex-column">
-                        <li class="nav-item mb-2"><a href="#" class="nav-link p-0 text-body-secondary">Home</a></li>
-                        <li class="nav-item mb-2"><a href="#" class="nav-link p-0 text-body-secondary">Features</a></li>
-                        <li class="nav-item mb-2"><a href="#" class="nav-link p-0 text-body-secondary">Pricing</a></li>
-                        <li class="nav-item mb-2"><a href="#" class="nav-link p-0 text-body-secondary">FAQs</a></li>
-                        <li class="nav-item mb-2"><a href="#" class="nav-link p-0 text-body-secondary">About</a></li>
-                    </ul>
-                </div>
-                <div class="col-6 col-md-2 mb-3">
-                    <h5>Section</h5>
-                    <ul class="nav flex-column">
-                        <li class="nav-item mb-2"><a href="#" class="nav-link p-0 text-body-secondary">Home</a></li>
-                        <li class="nav-item mb-2"><a href="#" class="nav-link p-0 text-body-secondary">Features</a></li>
-                        <li class="nav-item mb-2"><a href="#" class="nav-link p-0 text-body-secondary">Pricing</a></li>
-                        <li class="nav-item mb-2"><a href="#" class="nav-link p-0 text-body-secondary">FAQs</a></li>
-                        <li class="nav-item mb-2"><a href="#" class="nav-link p-0 text-body-secondary">About</a></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="d-flex flex-column flex-sm-row justify-content-between py-4 my-4 border-top">
-                <p>&copy; 2025 Company, Inc. All rights reserved.</p>
-                <ul class="list-unstyled d-flex">
-                    <li class="ms-3"><a class="link-body-emphasis" href="#" aria-label="Instagram"><svg class="bi"
-                                width="24" height="24">
-                                <use xlink:href="#instagram" />
-                            </svg></a></li>
-                    <li class="ms-3"><a class="link-body-emphasis" href="#" aria-label="Facebook"><svg class="bi"
-                                width="24" height="24" aria-hidden="true">
-                                <use xlink:href="#facebook" />
-                            </svg></a></li>
-                </ul>
-            </div>
-        </footer>
-    </div>
-    <!-- 
-footer fin
- -->
-    <link rel="stylesheet" href="js/bootstrap.min.js">
+    <h2 style="text-align:center;"><?= $modo_edicion ? 'Editar Producto' : 'Agregar Producto' ?></h2>
+
+    <form method="POST">
+        <label>ID:</label>
+        <input type="number" name="id" value="<?= htmlspecialchars($id) ?>" <?= $modo_edicion ? 'readonly' : '' ?> required>
+
+        <label>Nombre:</label>
+        <input type="text" name="nombre" value="<?= htmlspecialchars($nombre) ?>" required>
+
+        <label>Descripción:</label>
+        <textarea name="descripcion" required><?= htmlspecialchars($descripcion) ?></textarea>
+
+        <label>Cantidad Disponible:</label>
+        <input type="number" name="cant_disponible" value="<?= htmlspecialchars($cant) ?>" required>
+
+        <br><br>
+        <input type="submit" name="guardar" value="<?= $modo_edicion ? 'Actualizar' : 'Guardar' ?>">
+    </form>
+
+    <h2 style="text-align:center;">Lista de Productos</h2>
+
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Descripción</th>
+            <th>Cantidad Disponible</th>
+            <th>Acciones</th>
+        </tr>
+
+        <?php while ($row = $resultado->fetch_assoc()) { ?>
+            <tr>
+                <td><?= $row['id'] ?></td>
+                <td><?= htmlspecialchars($row['nombre']) ?></td>
+                <td><?= nl2br(htmlspecialchars($row['descripcion'])) ?></td>
+                <td><?= $row['cant_disponible'] ?></td>
+                <td>
+                    <a href="?editar=<?= $row['id'] ?>" class="btn-editar">Editar</a>
+                    <a href="?eliminar=<?= $row['id'] ?>" class="btn-eliminar" onclick="return confirm('¿Seguro que deseas eliminar este producto?');">Eliminar</a>
+                </td>
+            </tr>
+        <?php } ?>
+    </table>
+
 </body>
 
 </html>
